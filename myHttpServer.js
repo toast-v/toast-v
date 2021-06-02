@@ -1,38 +1,111 @@
 const http = require('http');
-const fs=require('fs');
-const querystring=require('querystring');
-const url=require('url');
+const fs = require('fs');
+const querystring = require('querystring');
+const url = require('url');
+const insertDB = require('./MongodbLib')
 const express = require('express')
-const app =express()
+const app = express()
+const ejs = require("ejs")
 
+//mongoose-------------------------------------------
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/mongooseforuser', { useNewUrlParser: true, useUnifiedTopology: true });
+var Schema = mongoose.Schema
+
+var userSchema = new Schema({
+    name: String,
+    password: String
+})
+const User = mongoose.model('User', userSchema);
+
+app.set("view engien", "ejs")
+app.set("views", "/views")
 //app.use(express.static(__dirname+"/private"))
-app.use(express.static(__dirname+"/public"))
-var a= ''
-var name= ''
-var password= ''
-var submit= ''
-app.get('/input', (req, res,next) => {
-    name=req.query.name;
-    password=req.query.password;
-    submit=req.query.submit1;
-
-    if(name.length!=0&&password.length!=0) next()
+app.use(express.static(__dirname + "/public"))
+var a = ''
+var name = ''
+var password = ''
+var submit = ''
+//doc={}
+app.get('/input', (req, res, next) => {
+    name = req.query.name;
+    password = req.query.password;
+    submit = req.query.submit1;
+    //doc[name]=password;
+    console.log(name)
+    if (name.length != 0 && password.length != 0) next()
     else {
-        res.send("用户名和密码都不能为空，请输入。")
+        res.render(__dirname + "/views/resp.ejs", { message: "用户名和密码都不能为空，请输入。" })
+        //res.send("用户名和密码都不能为空，请输入。")
     }
 
-    //res.send('Hello World!')
-    // a= "this is a next() test"
-    // res.send("first")
-    // next()
+})
 
-  })
-app.get('/input', (req, res,next) => {
-    if(submit=='注册'){
-        
+app.get('/input', (req, res, next) => {
+    newUserlog = new User({ name: name, password: password });
+    User.find({name:name},(err,docs)=>{if(!err){
+        if(docs.length!=0) nameInDB=100;
+        else nameInDB=0
+        next();
+    }})
+
+})
+
+app.get('/input', (req, res, next) => {
+    if (submit == '注册') {
+        if(nameInDB==0) {
+            //写入
+            newUserlog.save((err)=>{res.send("注册成功")});
+        }
+        else{
+            res.render(__dirname+"/views/resp.ejs",{message:"用户名已存在，请重新输入"})
+        }
+
+        //insertDB.insertData("mydb","mycollection",[{name:name,password:password}])
+        /*
+        insertDB.myfind("mydb","login",{name:name,password:password},(docs)=>{
+            if(docs.length==0){
+                insertDB.insertData("mydb","login",[{name:name,password:password}])
+                // collection.insertMany([findData],function(err,result){
+                //     if(err) console.log("写入失败。");
+                //     else console.log("注册成功！");
+                // })
+                res.send("注册成功") //一般不写在这里，应该写在回调函数内
+            }
+            else {
+                loginFlag=1;
+                console.log("注册失败！")
+                res.send("注册失败")
+            }
+        })
+        */
     }
-    res.send(a)
-  })
+    //res.send(a)
+})
+
+app.get('/input', (req, res, next) => {
+    if (submit == '登录') {
+        User.find({name:name,password:password},(err,docs)=>{if(!err){
+            if(docs.length!=0)res.send("欢迎"+name+"到来");
+            else res.render(__dirname+"/views/resp.ejs",{message:"用户名或密码错误，请重新输入！"})
+        }})
+
+
+
+        //insertDB.insertData("mydb","mycollection",[{name:name,password:password}])
+        // insertDB.myfind("mydb", "login", { name: name, password: password }, (docs) => {
+        //     if (docs.length == 0) {
+        //         res.send("用户名密码错误，登录失败。") //一般不写在这里，应该写在回调函数内
+        //     }
+        //     else {
+        //         res.send("登录成功。")
+        //     }
+        // })
+
+    }
+    //res.send(a)
+})
+
 
 app.listen(3000)
 
@@ -53,7 +126,7 @@ const server = http.createServer((req,res) => {
             res.end();
         })
         //res.write(fsData);
-        
+
     }
 
     //加载图标
@@ -68,7 +141,7 @@ const server = http.createServer((req,res) => {
     //         }
     //         res.write(fsData);
     //         res.end();
-    //     })      
+    //     })
     // }
 
 
