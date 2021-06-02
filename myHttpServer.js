@@ -2,7 +2,42 @@ const http = require('http');
 const fs=require('fs');
 const querystring=require('querystring');
 const url=require('url');
-//var i = 0;
+const express = require('express')
+const app =express()
+
+//app.use(express.static(__dirname+"/private"))
+app.use(express.static(__dirname+"/public"))
+var a= ''
+var name= ''
+var password= ''
+var submit= ''
+app.get('/input', (req, res,next) => {
+    name=req.query.name;
+    password=req.query.password;
+    submit=req.query.submit1;
+
+    if(name.length!=0&&password.length!=0) next()
+    else {
+        res.send("用户名和密码都不能为空，请输入。")
+    }
+
+    //res.send('Hello World!')
+    // a= "this is a next() test"
+    // res.send("first")
+    // next()
+
+  })
+app.get('/input', (req, res,next) => {
+    if(submit=='注册'){
+        
+    }
+    res.send(a)
+  })
+
+app.listen(3000)
+
+/*
+var i = 0;
 
 const server = http.createServer((req,res) => {
     //i++;
@@ -20,21 +55,24 @@ const server = http.createServer((req,res) => {
         //res.write(fsData);
         
     }
-    else if(req.url=="/favicon.ico"){
-        res.statusCode = 200;
-        res.setHeader('Content-Type','text/img');
-        //var fsData=fs.readSync();
-        fs.readFile("favicon.ico",(err,fsData)=>{
-            if(err){
-                console.log("Read file error-icon");
-                throw err;
-            }
-            res.write(fsData);
-            res.end();
-        })
-        
-        
-    }
+
+    //加载图标
+    // else if(req.url=="/favicon.ico"){
+    //     res.statusCode = 200;
+    //     res.setHeader('Content-Type','text/img');
+    //     //var fsData=fs.readSync();
+    //     fs.readFile("favicon.ico",(err,fsData)=>{
+    //         if(err){
+    //             console.log("Read file error-icon");
+    //             throw err;
+    //         }
+    //         res.write(fsData);
+    //         res.end();
+    //     })      
+    // }
+
+
+
     else if(req.url.slice(0,6)=="/input"){
         res.statusCode = 200;
         let url123=req.url.split("?");
@@ -89,4 +127,4 @@ const server = http.createServer((req,res) => {
 });
 
 server.listen(3000);
-
+*/
